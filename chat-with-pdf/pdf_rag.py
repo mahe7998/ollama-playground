@@ -14,12 +14,15 @@ Context: {context}
 Answer:
 """
 
-pdfs_directory = 'chat-with-pdf/pdfs/'
+pdfs_directory = './pdfs/'
 
-embeddings = OllamaEmbeddings(model="deepseek-r1:14b")
+#embeddings = OllamaEmbeddings(model="hf.co/bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF:Q5_K_L")
+embeddings = OllamaEmbeddings(model="deepseek-r1:70b")
+
 vector_store = InMemoryVectorStore(embeddings)
 
-model = OllamaLLM(model="deepseek-r1:14b")
+#model = OllamaLLM(model="hf.co/bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF:Q5_K_L")
+model = OllamaLLM(model="deepseek-r1:70b")
 
 def upload_pdf(file):
     with open(pdfs_directory + file.name, "wb") as f:
@@ -28,7 +31,6 @@ def upload_pdf(file):
 def load_pdf(file_path):
     loader = PDFPlumberLoader(file_path)
     documents = loader.load()
-
     return documents
 
 def split_text(documents):
@@ -37,7 +39,6 @@ def split_text(documents):
         chunk_overlap=200,
         add_start_index=True
     )
-
     return text_splitter.split_documents(documents)
 
 def index_docs(documents):
@@ -50,7 +51,6 @@ def answer_question(question, documents):
     context = "\n\n".join([doc.page_content for doc in documents])
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | model
-
     return chain.invoke({"question": question, "context": context})
 
 uploaded_file = st.file_uploader(
